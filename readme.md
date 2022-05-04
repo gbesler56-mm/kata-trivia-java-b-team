@@ -1,5 +1,6 @@
 # Trivia Refactoring Kata
-Arranged by Victor Rentea
+Arranged by Victor Rentea, forked by Galina Besler
+
 Just one of the many coding katas at [kata-log.rocks](https://kata-log.rocks/)
 
 ## The problem
