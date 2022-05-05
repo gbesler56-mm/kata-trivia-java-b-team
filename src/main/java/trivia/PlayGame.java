@@ -21,7 +21,7 @@ public class PlayGame {
       for (int i = 1; i <= playerCount; i++) {
          System.out.print("Player "+i+" name: ");
          String playerName = scanner.nextLine();
-         aGame.add(playerName);
+         aGame.addPlayerToGame(playerName);
       }
 
       System.out.println("\n\n--Starting game--");
