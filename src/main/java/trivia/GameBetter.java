@@ -2,16 +2,15 @@ package trivia;
 
 import java.util.ArrayList;
 
-// REFACTOR ME
+import static trivia.Category.valueOfLabel;
 
 public class GameBetter implements IGame {
 
-   ArrayList<Player> players = new ArrayList<>();
-
-   int currentPlayer = 0;
-   boolean isGettingOutOfPenaltyBox;
-
+   private ArrayList<Player> players = new ArrayList<>();
    private final QuestionRepo questionRepo = new QuestionRepo();
+
+   private int currentPlayer = 0;
+   private boolean isGettingOutOfPenaltyBox;
 
    public GameBetter() {
       questionRepo.init();
@@ -20,7 +19,6 @@ public class GameBetter implements IGame {
    public boolean addPlayerToGame(String playerName) {
 
       players.add(new Player(playerName));
-
       System.out.println(playerName + " was added");
       System.out.println("They are player number " + players.size());
       return true;
@@ -31,85 +29,33 @@ public class GameBetter implements IGame {
       System.out.println(player + " is the current player");
       System.out.println("They have rolled a " + roll);
 
-      if (player.isInPenaltyBox()) {
-         if (roll % 2 != 0) {
-            isGettingOutOfPenaltyBox = true;
-
-            System.out.println(player + " is getting out of the penalty box");
-            moveAndAsk(roll);
-         } else {
-            System.out.println(player + " is not getting out of the penalty box");
-            isGettingOutOfPenaltyBox = false;
-         }
-
-      } else {
-
-         moveAndAsk(roll);
+      if (!player.isInPenaltyBox()){
+         movePlayer(roll);
+         askQuestion();
       }
-
-   }
-
-   private void moveAndAsk(int roll) {
-      movePlayer(roll);
-
-      System.out.println(players.get(currentPlayer)
-              + "'s new location is "
-              + players.get(currentPlayer).getPlace());
-      System.out.println("The category is " + currentCategory());
-      questionRepo.askQuestion(currentCategory());
-   }
-
-   private void movePlayer(int roll) {
-      Player currentPlayer = players.get(this.currentPlayer);
-
-      currentPlayer.setPlace((currentPlayer.getPlace() + roll)%12);
-
-   }
-
-   public static Category valueOfLabel(int mod4Label) {
-      for (Category category : Category.values()) {
-         if (category.mod4==mod4Label) {
-            return category;
-         }
+      if (player.isInPenaltyBox() && (roll%2 == 1)) {
+         isGettingOutOfPenaltyBox = true;
+         System.out.println(player + " is getting out of the penalty box");
+         movePlayer(roll);
+         askQuestion();
       }
-      return null;
-   }
-
-   private Category currentCategory() {
-
-      int currentPlayerPosition = players.get(currentPlayer).getPlace();
-      return valueOfLabel(currentPlayerPosition%4);
+      if (player.isInPenaltyBox() && (roll % 2 == 0 )) {
+         System.out.println(player + " is not getting out of the penalty box");
+         isGettingOutOfPenaltyBox = false;
+      }
    }
 
    public boolean wasCorrectlyAnswered() {
       Player player = players.get(currentPlayer);
-
+      boolean winner;
       if (player.inPenaltyBox && !isGettingOutOfPenaltyBox) {
-            nextPlayer();
-            return true;
-
+         winner = true;
       } else {
          rewardForCorrectAnswer(player);
-
-         boolean winner = didPlayerWin();
-         nextPlayer();
-
-         return winner;
+         winner = didPlayerWin();
       }
-   }
-
-   private void rewardForCorrectAnswer(Player player) {
-      System.out.println("Answer was correct!!!!");
-      player.setPurse(player.getPurse() + 1);
-      System.out.println(player
-              + " now has "
-              + player.getPurse()
-              + " Gold Coins.");
-   }
-
-   private void nextPlayer() {
-      currentPlayer++;
-      if (currentPlayer == players.size()) currentPlayer = 0;
+      nextPlayer();
+      return  winner;
    }
 
    public boolean wrongAnswer() {
@@ -121,6 +67,33 @@ public class GameBetter implements IGame {
       return true;
    }
 
+   private void rewardForCorrectAnswer(Player player) {
+      System.out.println("Answer was correct!!!!");
+      player.setPurse(player.getPurse() + 1);
+      System.out.println(player
+              + " now has "
+              + player.getPurse()
+              + " Gold Coins.");
+   }
+
+   private void askQuestion() {
+      int currentPlayerPosition = players.get(currentPlayer).getPlace();
+      Category currentCategory = valueOfLabel(currentPlayerPosition%4);
+      System.out.println(players.get(currentPlayer)
+              + "'s new location is "
+              + players.get(currentPlayer).getPlace());
+      System.out.println("The category is " + currentCategory);
+      questionRepo.askQuestion(currentCategory);
+   }
+
+   private void movePlayer(int roll) {
+      Player currentPlayer = players.get(this.currentPlayer);
+      currentPlayer.setPlace((currentPlayer.getPlace() + roll) % 12);
+   }
+
+   private void nextPlayer() {
+      currentPlayer = (currentPlayer+1) % players.size();
+   }
 
    private boolean didPlayerWin() {
       return !(players.get(currentPlayer).getPurse() == 6);

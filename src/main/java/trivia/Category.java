@@ -19,4 +19,13 @@ enum Category {
     public String toString() {
         return categoryName;
     }
+
+    public static Category valueOfLabel(int mod4Label) {
+        for (Category category : Category.values()) {
+            if (category.mod4==mod4Label) {
+                return category;
+            }
+        }
+        return null;
+    }
 }
